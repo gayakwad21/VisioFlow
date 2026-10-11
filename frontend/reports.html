@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VisioFlow | Reports</title>
+  <link rel="stylesheet" href="/css/style.css?v=20261011-orange-2">
+</head>
+<body class="reports-page">
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header"><a class="sidebar-brand" href="/dashboard.html"><img class="sidebar-logo" src="/static/assets/images/visioflow-logo.png?v=2" alt="VisioFlow logo"><span class="sidebar-brand-name">VisioFlow</span></a></div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html" class="nav-item">📊 Dashboard</a>
+        <a href="/projects.html" class="nav-item">📁 Projects</a>
+        <a href="/pipeline-editor.html" class="nav-item">🛠️ Visual Editor</a>
+        <a href="/analytics.html" class="nav-item">📈 Analytics</a>
+        <a href="/history.html" class="nav-item">🕒 History</a>
+        <a href="/reports.html" class="nav-item active">📄 Reports</a>
+        <a href="/api-playground.html" class="nav-item">🧪 API Playground</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="top-header"><div class="header-title">Analysis &amp; Execution Reports</div><button id="new-report-btn" class="btn btn-primary">＋ Generate report</button></header>
+      <div class="content-body report-content">
+        <section class="page-intro">
+          <div><p class="eyebrow">YOUR WORKSPACE</p><h1>Processing reports</h1><p class="text-muted">Review inputs, pipeline execution, and verified output details.</p></div>
+          <span id="report-count" class="report-count">Loading…</span>
+        </section>
+        <section class="report-toolbar" aria-label="Filter reports">
+          <label class="search-field"><span aria-hidden="true">⌕</span><span class="visually-hidden">Search reports</span><input id="reports-search" class="form-control" type="search" placeholder="Search title, project, pipeline or input"></label>
+          <label class="report-status-filter"><span class="visually-hidden">Filter by status</span><select id="reports-status" class="form-control"><option value="">All statuses</option><option value="COMPLETED">Completed</option><option value="PROCESSING">Processing</option><option value="QUEUED">Queued</option><option value="FAILED">Failed</option><option value="CANCELLED">Cancelled</option></select></label>
+        </section>
+        <div id="reports-error" class="notice notice-error" role="alert" hidden></div>
+        <section id="reports-list" class="report-list" aria-live="polite"><div class="loading-state">Loading your reports…</div></section>
+      </div>
+    </main>
+  </div>
+
+  <div id="report-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="report-modal-title">
+    <div class="modal">
+      <div class="modal-header"><span id="report-modal-title">Generate a processing report</span><button type="button" class="icon-button" data-close-report aria-label="Close">×</button></div>
+      <div class="form-group"><label for="report-job-select">Processing job</label><select id="report-job-select" class="form-control"></select></div>
+      <div id="report-modal-error" class="notice notice-error" hidden></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" data-close-report>Cancel</button><button id="generate-report-submit" type="button" class="btn btn-primary">Generate report</button></div>
+    </div>
+  </div>
+  <div id="toast-region" class="toast-region" aria-live="polite"></div>
+  <script src="/js/api.js"></script>
+  <script src="/js/reports.js"></script>
+</body>
+</html>

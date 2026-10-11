@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VisioFlow | API Playground</title>
+  <link rel="stylesheet" href="/css/style.css?v=20261011-orange-2">
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header"><a class="sidebar-brand" href="/dashboard.html"><img class="sidebar-logo" src="/static/assets/images/visioflow-logo.png?v=2" alt="VisioFlow logo"><span class="sidebar-brand-name">VisioFlow</span></a></div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html" class="nav-item">📊 Dashboard</a>
+        <a href="/projects.html" class="nav-item">📁 Projects</a>
+        <a href="/pipeline-editor.html" class="nav-item">🛠️ Visual Editor</a>
+        <a href="/analytics.html" class="nav-item">📈 Analytics</a>
+        <a href="/history.html" class="nav-item">🕒 History</a>
+        <a href="/reports.html" class="nav-item">📄 Reports</a>
+        <a href="/api-playground.html" class="nav-item active">🧪 API Playground</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="top-header">
+        <div class="header-title">Developer REST API Playground</div>
+      </header>
+
+      <div class="content-body">
+        <div class="api-playground-grid">
+          <div class="api-playground-card">
+            <h3 style="margin-bottom: 1rem;">API Request</h3>
+            
+            <div class="form-group">
+              <label for="api-method">HTTP Method</label>
+              <select id="api-method" class="form-control">
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="DELETE">DELETE</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="api-endpoint">Endpoint URL</label>
+              <select id="api-endpoint" class="form-control" onchange="document.getElementById('custom-url').value=this.value">
+                <option value="/api/analytics/dashboard/">/api/analytics/dashboard/</option>
+                <option value="/api/projects/">/api/projects/</option>
+                <option value="/api/pipelines/">/api/pipelines/</option>
+                <option value="/api/jobs/">/api/jobs/</option>
+                <option value="/api/reports/">/api/reports/</option>
+                <option value="/api/pipelines/generate-ai/">/api/pipelines/generate-ai/</option>
+              </select>
+              <label class="visually-hidden" for="custom-url">Custom endpoint URL</label>
+              <input type="text" id="custom-url" class="form-control" style="margin-top:0.5rem;" value="/api/analytics/dashboard/">
+            </div>
+
+            <div class="form-group">
+              <label for="api-body">JSON Request Body (For POST/PUT)</label>
+              <textarea id="api-body" class="form-control" rows="6" style="font-family: monospace; font-size: 0.85rem;" placeholder="{}"></textarea>
+            </div>
+
+            <button id="send-request-btn" class="btn btn-primary" style="width: 100%;">Send REST Request</button>
+          </div>
+
+          <div class="api-playground-card">
+            <h3 style="margin-bottom: 1rem;">API Response</h3>
+            <div id="response-status" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Status: Ready</div>
+            <textarea id="api-response" class="form-control code-output" rows="14" readonly placeholder="Response JSON will appear here..."></textarea>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    document.getElementById('send-request-btn').addEventListener('click', async () => {
+      const method = document.getElementById('api-method').value;
+      const url = document.getElementById('custom-url').value;
+      const bodyStr = document.getElementById('api-body').value;
+      const respBox = document.getElementById('api-response');
+      const statusBox = document.getElementById('response-status');
+
+      statusBox.textContent = 'Status: Sending request...';
+      const start = Date.now();
+
+      try {
+        let body = null;
+        if (bodyStr && (method === 'POST' || method === 'PUT')) {
+          body = JSON.parse(bodyStr);
+        }
+
+        const endpoint = url.startsWith('/api') ? url.substring(4) : url;
+        const res = await apiRequest(endpoint, method, body);
+        const elapsed = Date.now() - start;
+
+        statusBox.innerHTML = `<span class="status-success">HTTP 200 OK</span> (${elapsed} ms)`;
+        respBox.value = JSON.stringify(res, null, 2);
+      } catch (err) {
+        const elapsed = Date.now() - start;
+        statusBox.innerHTML = `<span class="error-text">Error</span> (${elapsed} ms)`;
+        respBox.value = JSON.stringify({ error: err.message }, null, 2);
+      }
+    });
+  </script>
+</body>
+</html>

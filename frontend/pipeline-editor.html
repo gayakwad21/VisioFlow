@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VisioFlow | Pipeline Editor</title>
+  <link rel="stylesheet" href="/css/style.css?v=20261011-orange-2">
+  <link rel="stylesheet" href="/css/pipeline-editor.css?v=20261011-orange-2">
+</head>
+<body class="editor-page">
+  <div class="top-header">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <a class="pipeline-editor-brand" href="/dashboard.html"><img src="/static/assets/images/visioflow-logo.png?v=2" alt="VisioFlow logo"><span>VisioFlow</span><span class="editor-brand-context">Pipeline Editor</span></a>
+      <select id="project-select" class="form-control" style="width: 200px; padding: 0.35rem;">
+        <option value="">-- Select Project --</option>
+      </select>
+      <select id="input-file-select" class="form-control" style="width: 210px; padding: 0.35rem;" aria-label="Pipeline input file">
+        <option value="">-- Select Input Media --</option>
+      </select>
+      <input type="text" id="pipeline-name-input" class="form-control" placeholder="Pipeline Name..." value="Untitled Pipeline" style="width: 220px; padding: 0.35rem;">
+      <select id="template-select" class="form-control" style="width: 190px; padding: 0.35rem;" aria-label="Pipeline template">
+        <option value="">-- Choose Template --</option>
+      </select>
+      <select id="version-select" class="form-control" style="width: 150px; padding: 0.35rem;" aria-label="Pipeline version" disabled>
+        <option value="">Current draft</option>
+      </select>
+      <button id="restore-version-btn" class="btn btn-secondary" disabled>Restore</button>
+    </div>
+    <div style="display: flex; gap: 0.5rem; align-items: center;">
+      <button id="preset-btn" class="btn btn-secondary">⚡ Load Template</button>
+      <button id="ai-gen-btn" class="btn btn-secondary">✨ AI Assistant</button>
+      <button id="export-code-btn" class="btn btn-secondary">🐍 Export Code</button>
+      <button id="save-pipeline-btn" class="btn btn-secondary">💾 Save</button>
+      <button id="save-version-btn" class="btn btn-secondary" disabled>▤ Version</button>
+      <button id="run-pipeline-btn" class="btn btn-success">▶ RUN PIPELINE</button>
+    </div>
+  </div>
+
+  <div class="editor-container">
+    <!-- Left Sidebar: Node Toolbox -->
+    <aside class="editor-left-sidebar">
+      <div class="sidebar-section-title">INPUT & FILES</div>
+      <div class="node-list">
+        <div class="node-item" draggable="true" ondragstart="event.dataTransfer.setData('node-type', 'imageSource')">🖼️ Image Source</div>
+        <div class="node-item" draggable="true" ondragstart="event.dataTransfer.setData('node-type', 'output')">📤 Output</div>
+      </div>
+
+      <div class="sidebar-section-title">PREPROCESSING</div>
+      <div class="node-list">
+        <div class="node-item" draggable="true" ondragstart="event.dataTransfer.setData('node-type', 'grayscale')">🎨 Grayscale</div>
+        <div class="node-item" draggable="true" ondragstart="event.dataTransfer.setData('node-type', 'brightness')">☀️ Brightness/Contrast</div>
+        <div class="node-item" draggable="true" ondragstart="event.dataTransfer.setData('node-type', 'rotate')">🔄 Rotate</div>
+        <div class="node-item" draggable="true" ondragstart="event.dataTransfer.setData('node-type', 'resize')">↔️ Resize</div>
+        <div class="node-item" draggable="true" ondragstart="event.dataTransfer.setData('node-type', 'crop')">✂️ Crop</div>
+      </div>
+
+      <div class="sidebar-section-title">FILTERS & EDGES</div>
+      <div class="node-list">
+        <div class="node-item" draggable="true" ondragstart="event.dataTransfer.setData('node-type', 'blur')">💧 Blur Filter</div>
+        <div class="node-item" draggable="true" ondragstart="event.dataTransfer.setData('node-type', 'gaussianBlur')">🌫️ Gaussian Blur</div>
+        <div class="node-item" draggable="true" ondragstart="event.dataTransfer.setData('node-type', 'medianBlur')">🧽 Median Blur</div>
+        <div class="node-item" draggable="true" ondragstart="event.dataTransfer.setData('node-type', 'canny')">⚡ Canny Edge</div>
+        <div class="node-item" draggable="true" ondragstart="event.dataTransfer.setData('node-type', 'threshold')">🌓 Threshold</div>
+        <div class="node-item" draggable="true" ondragstart="event.dataTransfer.setData('node-type', 'adaptiveThreshold')">◐ Adaptive Threshold</div>
+        <div class="node-item" draggable="true" ondragstart="event.dataTransfer.setData('node-type', 'morphological')">🧪 Morphology</div>
+        <div class="node-item" draggable="true" ondragstart="event.dataTransfer.setData('node-type', 'sharpen')">✳️ Sharpen</div>
+      </div>
+
+      <div class="sidebar-section-title">ANALYSIS & AI</div>
+      <div class="node-list">
+        <div class="node-item" draggable="true" ondragstart="event.dataTransfer.setData('node-type', 'findContours')">📐 Find Contours</div>
+        <div class="node-item" draggable="true" ondragstart="event.dataTransfer.setData('node-type', 'objectDetection')">🔍 Object Detection</div>
+        <div class="node-item" draggable="true" ondragstart="event.dataTransfer.setData('node-type', 'histogram')">▥ Histogram</div>
+        <div class="node-item" draggable="true" ondragstart="event.dataTransfer.setData('node-type', 'imageStatistics')">∑ Image Statistics</div>
+      </div>
+    </aside>
+
+    <!-- Center Graph Canvas -->
+    <main class="editor-canvas-wrapper" id="canvas-wrapper">
+      <svg id="svg-connections"></svg>
+    </main>
+
+    <!-- Right Sidebar: Properties & Output -->
+    <aside class="editor-right-sidebar">
+      <div class="panel-header">Node Properties</div>
+      <div class="panel-content" id="properties-panel">
+        <div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; margin-top: 2rem;">
+          Select a node on the canvas to configure its parameters.
+        </div>
+      </div>
+
+      <div class="panel-header" style="border-top: 1px solid var(--border-color);">Execution Output</div>
+      <div class="panel-content" style="text-align: center;">
+        <img id="result-img-preview" style="max-width: 100%; border-radius: 0.375rem; border: 1px solid var(--border-color); display: none;" src="" alt="Result Preview">
+        <video id="result-video-preview" style="max-width: 100%; border-radius: 0.375rem; border: 1px solid var(--border-color); display: none;" controls preload="metadata"></video>
+        <div id="no-result-placeholder" style="color: var(--text-muted); font-size: 0.85rem; margin-top: 1rem;">
+          No execution result yet. Click <strong>RUN PIPELINE</strong> to execute.
+        </div>
+        <div id="metrics-display" class="metrics-display"></div>
+        <a id="job-result-link" class="btn btn-secondary" href="#" hidden>Open result</a>
+      </div>
+    </aside>
+
+    <!-- Bottom Execution Logs -->
+    <div class="editor-bottom-logs">
+      <div class="logs-header">
+        <span>Execution Logs</span>
+        <span style="cursor:pointer;" onclick="document.getElementById('logs-box').innerHTML=''">Clear</span>
+      </div>
+      <div class="logs-content" id="logs-box">
+        [System] VisioFlow Node Pipeline Builder Ready.
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Modal -->
+  <div id="ai-modal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <span>✨ AI Pipeline Generator</span>
+        <span style="cursor:pointer;" onclick="document.getElementById('ai-modal').classList.remove('active')">&times;</span>
+      </div>
+      <div class="form-group">
+        <label for="ai-prompt">Describe your Computer Vision task:</label>
+        <textarea id="ai-prompt" class="form-control" rows="3" placeholder="e.g., Detect strong structural edges and extract object contour shapes from this image"></textarea>
+      </div>
+      <button id="submit-ai-prompt" class="btn btn-primary" style="width: 100%;">Generate Pipeline with AI</button>
+      <div id="ai-explanation" class="ai-explanation"></div>
+    </div>
+  </div>
+
+  <!-- Python Export Modal -->
+  <div id="export-modal" class="modal-overlay">
+    <div class="modal" style="max-width: 700px;">
+      <div class="modal-header">
+        <span>🐍 Generated Python OpenCV Code</span>
+        <span style="cursor:pointer;" onclick="document.getElementById('export-modal').classList.remove('active')">&times;</span>
+      </div>
+      <textarea id="python-code-box" class="form-control code-output" rows="12" readonly></textarea>
+      <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+        <button id="copy-code-btn" class="btn btn-primary">Copy Code</button>
+        <button id="download-code-btn" class="btn btn-secondary">Download .py</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/pipeline-builder.js"></script>
+  <script>
+    let builder = null;
+    let currentPipelineId = null;
+    let loadedPipelineProject = null;
+    let pipelineVersions = [];
+    let selectedVersionId = '';
+
+    function showEditorError(message) {
+      log(`Error: ${message}`);
+      alert(message);
+    }
+
+    async function loadInputFiles(projectId, selectedFileId = '') {
+      const select = document.getElementById('input-file-select');
+      select.innerHTML = '<option value="">-- Select Input Media --</option>';
+      if (!projectId) return;
+      const files = await API.getFiles(projectId);
+      files.forEach(file => {
+        const option = document.createElement('option');
+        option.value = file.id;
+        option.textContent = `${file.original_name} (${file.file_type})`;
+        option.dataset.fileType = file.file_type;
+        select.appendChild(option);
+      });
+      if (selectedFileId) select.value = selectedFileId;
+    }
+
+    async function loadPipelineVersions(pipelineId, selectedId = '') {
+      const select = document.getElementById('version-select');
+      select.innerHTML = '<option value="">Current draft</option>';
+      pipelineVersions = await API.getPipelineVersions(pipelineId);
+      pipelineVersions.forEach(version => {
+        const option = document.createElement('option');
+        option.value = version.id;
+        option.textContent = `v${version.version_number} · ${version.created_at ? new Date(version.created_at).toLocaleString() : version.name}`;
+        select.appendChild(option);
+      });
+      select.disabled = pipelineVersions.length === 0;
+      document.getElementById('restore-version-btn').disabled = pipelineVersions.length === 0;
+      if (selectedId) select.value = String(selectedId);
+      selectedVersionId = select.value;
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      builder = new PipelineBuilder('canvas-wrapper', 'svg-connections');
+      builder.container.addEventListener('graphchange', () => {
+        if (!selectedVersionId) return;
+        selectedVersionId = '';
+        document.getElementById('version-select').value = '';
+        log('The selected saved version was edited; execution will use the current draft.');
+      });
+      
+      // Load user projects into dropdown
+      try {
+        const projects = await API.getProjects();
+        const sel = document.getElementById('project-select');
+        projects.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.id;
+          opt.textContent = p.name;
+          sel.appendChild(opt);
+        });
+
+        // Query param project pre-select
+        const urlParams = new URLSearchParams(window.location.search);
+        const projParam = urlParams.get('project');
+        if (projParam) sel.value = projParam;
+      } catch (e) {
+        showEditorError(`Could not load projects: ${e.message}`);
+      }
+
+      try {
+        const templates = await API.getTemplates();
+        const templateSelect = document.getElementById('template-select');
+        templates.forEach(template => {
+          const option = document.createElement('option');
+          option.value = template.id;
+          option.textContent = template.name;
+          option.dataset.name = template.name;
+          templateSelect.appendChild(option);
+        });
+      } catch (error) {
+        log(`Could not load pipeline templates: ${error.message}`);
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const projParam = urlParams.get('project');
+      const pipelineParam = urlParams.get('pipeline');
+      const fileParam = urlParams.get('input_file');
+      const versionParam = urlParams.get('version');
+      if (projParam) {
+        try {
+          await loadInputFiles(projParam, fileParam);
+        } catch (error) {
+          showEditorError(`Could not load project media: ${error.message}`);
+        }
+      }
+
+      if (pipelineParam) {
+        try {
+          const pipeline = await API.getPipeline(pipelineParam);
+          currentPipelineId = pipeline.id;
+          loadedPipelineProject = String(pipeline.project);
+          document.getElementById('project-select').value = pipeline.project;
+          document.getElementById('pipeline-name-input').value = pipeline.name;
+          document.getElementById('save-version-btn').disabled = false;
+          await loadPipelineVersions(pipeline.id, versionParam || '');
+          const selectedVersion = pipelineVersions.find(version => String(version.id) === String(versionParam));
+          if (versionParam && !selectedVersion) throw new Error('The requested pipeline version was not found.');
+          builder.loadGraph(selectedVersion ? selectedVersion.graph_data : pipeline.graph_data);
+          if (selectedVersion) document.getElementById('pipeline-name-input').value = selectedVersion.name;
+          await loadInputFiles(pipeline.project, fileParam);
+          log(`Loaded pipeline "${pipeline.name}".`);
+        } catch (error) {
+          showEditorError(`Could not load pipeline: ${error.message}`);
+        }
+      } else {
+        loadDefaultEdgePreset();
+      }
+
+      document.getElementById('project-select').addEventListener('change', async event => {
+        currentPipelineId = null;
+        loadedPipelineProject = null;
+        selectedVersionId = '';
+        pipelineVersions = [];
+        document.getElementById('version-select').innerHTML = '<option value="">Current draft</option>';
+        document.getElementById('version-select').disabled = true;
+        document.getElementById('restore-version-btn').disabled = true;
+        document.getElementById('save-version-btn').disabled = true;
+        try {
+          await loadInputFiles(event.target.value);
+        } catch (error) {
+          showEditorError(`Could not load project media: ${error.message}`);
+        }
+      });
+
+      window.onNodeSelected = (node) => {
+        const panel = document.getElementById('properties-panel');
+        if (!node) {
+          panel.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; margin-top: 2rem;">Select a node on the canvas to configure parameters.</div>';
+          return;
+        }
+
+        let html = `<div class="node-properties-title">Node: ${node.type}</div>`;
+        if (node.type === 'blur') {
+          html += `
+            <div class="form-group">
+              <label>Blur Type</label>
+              <select class="form-control" onchange="updateNodeData('${node.id}', 'blurType', this.value)">
+                <option value="gaussian" ${node.data.blurType==='gaussian'?'selected':''}>Gaussian Blur</option>
+                <option value="median" ${node.data.blurType==='median'?'selected':''}>Median Blur</option>
+                <option value="box" ${node.data.blurType==='box'?'selected':''}>Box Blur</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Kernel Size (Strength): <span id="strength-val">${node.data.strength||5}</span></label>
+              <input type="range" min="1" max="31" step="2" value="${node.data.strength||5}" class="form-control" oninput="document.getElementById('strength-val').textContent=this.value; updateNodeData('${node.id}', 'strength', parseInt(this.value))">
+            </div>
+          `;
+        } else if (node.type === 'canny') {
+          html += `
+            <div class="form-group">
+              <label>Threshold 1: <span id="t1-val">${node.data.threshold1||75}</span></label>
+              <input type="range" min="0" max="255" value="${node.data.threshold1||75}" class="form-control" oninput="document.getElementById('t1-val').textContent=this.value; updateNodeData('${node.id}', 'threshold1', parseInt(this.value))">
+            </div>
+            <div class="form-group">
+              <label>Threshold 2: <span id="t2-val">${node.data.threshold2||200}</span></label>
+              <input type="range" min="0" max="255" value="${node.data.threshold2||200}" class="form-control" oninput="document.getElementById('t2-val').textContent=this.value; updateNodeData('${node.id}', 'threshold2', parseInt(this.value))">
+            </div>
+          `;
+        } else if (node.type === 'brightness') {
+          html += `
+            <div class="form-group">
+              <label>Brightness: <span id="b-val">${node.data.brightness||20}</span></label>
+              <input type="range" min="-100" max="100" value="${node.data.brightness||20}" class="form-control" oninput="document.getElementById('b-val').textContent=this.value; updateNodeData('${node.id}', 'brightness', parseInt(this.value))">
+            </div>
+            <div class="form-group">
+              <label>Contrast Multiplier: <span id="c-val">${node.data.contrast||1.2}</span></label>
+              <input type="range" min="0.1" max="3.0" step="0.1" value="${node.data.contrast||1.2}" class="form-control" oninput="document.getElementById('c-val').textContent=this.value; updateNodeData('${node.id}', 'contrast', parseFloat(this.value))">
+            </div>
+          `;
+        } else if (node.type === 'resize' || node.type === 'crop') {
+          const fields = node.type === 'crop' ? ['x', 'y', 'width', 'height'] : ['width', 'height'];
+          html += fields.map(key => `<div class="form-group"><label>${key}</label><input type="number" min="0" max="8192" class="form-control" value="${node.data[key] ?? (key === 'width' ? 640 : key === 'height' ? 480 : 0)}" onchange="updateNodeData('${node.id}', '${key}', parseInt(this.value))"></div>`).join('');
+        } else if (node.type === 'gaussianBlur' || node.type === 'medianBlur') {
+          const sizeKey = node.type === 'gaussianBlur' ? 'kernelSize' : 'kernelSize';
+          html += `<div class="form-group"><label>Kernel size (odd)</label><input type="number" min="1" max="63" step="2" class="form-control" value="${node.data[sizeKey] || 5}" onchange="updateNodeData('${node.id}', '${sizeKey}', parseInt(this.value))"></div>`;
+        } else if (node.type === 'threshold') {
+          html += `<div class="form-group"><label>Threshold</label><input type="number" min="0" max="255" class="form-control" value="${node.data.threshold ?? 127}" onchange="updateNodeData('${node.id}', 'threshold', parseInt(this.value))"></div>
+            <div class="form-group"><label>Mode</label><select class="form-control" onchange="updateNodeData('${node.id}', 'mode', this.value)"><option value="binary" ${node.data.mode === 'binary' ? 'selected' : ''}>Binary</option><option value="adaptive" ${node.data.mode === 'adaptive' ? 'selected' : ''}>Adaptive</option><option value="otsu" ${node.data.mode === 'otsu' ? 'selected' : ''}>Otsu</option></select></div>`;
+        } else if (node.type === 'adaptiveThreshold') {
+          html += `<div class="form-group"><label>Block size (odd)</label><input type="number" min="3" max="99" step="2" class="form-control" value="${node.data.blockSize || 11}" onchange="updateNodeData('${node.id}', 'blockSize', parseInt(this.value))"></div>
+            <div class="form-group"><label>Constant</label><input type="number" class="form-control" value="${node.data.constant ?? 2}" onchange="updateNodeData('${node.id}', 'constant', parseFloat(this.value))"></div>`;
+        } else if (node.type === 'rotate') {
+          html += `<div class="form-group"><label>Angle</label><input type="number" min="0" max="359" class="form-control" value="${node.data.angle ?? 90}" onchange="updateNodeData('${node.id}', 'angle', parseInt(this.value))"></div>`;
+        } else if (node.type === 'morphological') {
+          html += `<div class="form-group"><label>Operation</label><select class="form-control" onchange="updateNodeData('${node.id}', 'operation', this.value)">${['erode', 'dilate', 'open', 'close'].map(value => `<option value="${value}" ${node.data.operation === value ? 'selected' : ''}>${value}</option>`).join('')}</select></div>
+            <div class="form-group"><label>Iterations</label><input type="number" min="1" max="20" class="form-control" value="${node.data.iterations || 1}" onchange="updateNodeData('${node.id}', 'iterations', parseInt(this.value))"></div>`;
+        } else if (node.type === 'sharpen') {
+          html += `<div class="form-group"><label>Amount</label><input type="number" min="0" max="5" step="0.1" class="form-control" value="${node.data.amount ?? 1}" onchange="updateNodeData('${node.id}', 'amount', parseFloat(this.value))"></div>`;
+        } else {
+          html += `<div style="font-size:0.85rem; color:var(--text-muted);">Standard operation node. Ready for pipeline execution.</div>`;
+        }
+        panel.innerHTML = html;
+      };
+    });
+
+    function updateNodeData(id, key, value) {
+      const node = builder.nodes.find(n => n.id === id);
+      if (node) {
+        node.data[key] = value;
+        builder.container.dispatchEvent(new Event('graphchange'));
+      }
+    }
+
+    function loadDefaultEdgePreset() {
+      builder.loadGraph({
+        nodes: [
+          { id: 'node-1', type: 'imageSource', position: { x: 80, y: 180 }, data: {} },
+          { id: 'node-2', type: 'grayscale', position: { x: 300, y: 180 }, data: {} },
+          { id: 'node-3', type: 'blur', position: { x: 520, y: 180 }, data: { strength: 5, blurType: 'gaussian' } },
+          { id: 'node-4', type: 'canny', position: { x: 740, y: 180 }, data: { threshold1: 75, threshold2: 200 } }
+        ],
+        edges: [
+          { id: 'e1', source: 'node-1', target: 'node-2' },
+          { id: 'e2', source: 'node-2', target: 'node-3' },
+          { id: 'e3', source: 'node-3', target: 'node-4' }
+        ]
+      });
+      log('Loaded Edge Detection preset workflow.');
+    }
+
+    function log(msg) {
+      const box = document.getElementById('logs-box');
+      box.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+      box.scrollTop = box.scrollHeight;
+    }
+
+    // Load a reusable persisted template, or keep the local default preset available.
+    document.getElementById('preset-btn').addEventListener('click', async () => {
+      const templateId = document.getElementById('template-select').value;
+      if (!templateId) {
+        loadDefaultEdgePreset();
+        return;
+      }
+      try {
+        const template = await API.getTemplate(templateId);
+        builder.loadGraph(template.graph_data);
+        document.getElementById('pipeline-name-input').value = template.name;
+        currentPipelineId = null;
+        loadedPipelineProject = null;
+        document.getElementById('save-version-btn').disabled = true;
+        log(`Loaded "${template.name}" template. Save it to a project to make it yours.`);
+      } catch (error) {
+        showEditorError(`Could not load template: ${error.message}`);
+      }
+    });
+
+    // Save Pipeline
+    document.getElementById('save-pipeline-btn').addEventListener('click', async () => {
+      const projId = document.getElementById('project-select').value;
+      if (!projId) {
+        alert('Please select a project from the top dropdown first!');
+        return;
+      }
+      const name = document.getElementById('pipeline-name-input').value;
+      const graphData = builder.getGraphData();
+      if (!name.trim()) {
+        showEditorError('Enter a pipeline name before saving.');
+        return;
+      }
+
+      try {
+        if (currentPipelineId && loadedPipelineProject === String(projId)) {
+          await API.updatePipeline(currentPipelineId, name, '', graphData);
+          log(`Pipeline updated successfully.`);
+        } else {
+          const created = await API.createPipeline(projId, name, '', graphData);
+          currentPipelineId = created.id;
+          loadedPipelineProject = String(projId);
+          log(`Pipeline saved with ID #${created.id}.`);
+        }
+        document.getElementById('save-version-btn').disabled = false;
+        selectedVersionId = '';
+        await loadPipelineVersions(currentPipelineId);
+        log('Pipeline saved successfully.');
+      } catch (err) {
+        showEditorError(err.message);
+      }
+    });
+
+    document.getElementById('save-version-btn').addEventListener('click', async () => {
+      if (!currentPipelineId) return;
+      try {
+        const version = await API.savePipelineVersion(currentPipelineId);
+        log(`Saved pipeline version ${version.version_number}.`);
+        await loadPipelineVersions(currentPipelineId, version.id);
+      } catch (error) {
+        showEditorError(`Could not save version: ${error.message}`);
+      }
+    });
+
+    document.getElementById('version-select').addEventListener('change', event => {
+      selectedVersionId = event.target.value;
+      if (!selectedVersionId) return;
+      const version = pipelineVersions.find(item => String(item.id) === selectedVersionId);
+      if (!version) return;
+      builder.loadGraph(version.graph_data);
+      document.getElementById('pipeline-name-input').value = version.name;
+      log(`Loaded pipeline version ${version.version_number} into the editor.`);
+    });
+
+    document.getElementById('restore-version-btn').addEventListener('click', async () => {
+      if (!currentPipelineId || !selectedVersionId) return;
+      try {
+        const restored = await API.restorePipelineVersion(currentPipelineId, selectedVersionId);
+        builder.loadGraph(restored.pipeline.graph_data);
+        document.getElementById('pipeline-name-input').value = restored.pipeline.name;
+        await loadPipelineVersions(currentPipelineId, restored.version.id);
+        log(`Restored pipeline to saved version ${restored.version.version_number}.`);
+      } catch (error) {
+        showEditorError(`Could not restore version: ${error.message}`);
+      }
+    });
+
+    // Run Pipeline
+    document.getElementById('run-pipeline-btn').addEventListener('click', async () => {
+      const projId = document.getElementById('project-select').value;
+      if (!projId) {
+        alert('Please select a project before running!');
+        return;
+      }
+      const inputSelect = document.getElementById('input-file-select');
+      if (!inputSelect.value) {
+        showEditorError('Select an uploaded image or video before running the pipeline.');
+        return;
+      }
+
+      if (loadedPipelineProject && loadedPipelineProject !== String(projId)) {
+        showEditorError('The loaded pipeline belongs to another project. Save it as a new pipeline first.');
+        return;
+      }
+      log('Starting pipeline execution request...');
+      const graphData = builder.getGraphData();
+      const runButton = document.getElementById('run-pipeline-btn');
+      runButton.disabled = true;
+
+      try {
+        let pipId = currentPipelineId;
+        if (!pipId) {
+          const created = await API.createPipeline(projId, document.getElementById('pipeline-name-input').value, '', graphData);
+          pipId = created.id;
+          currentPipelineId = pipId;
+          loadedPipelineProject = String(projId);
+          await loadPipelineVersions(pipId);
+        } else if (!selectedVersionId) {
+          await API.updatePipeline(pipId, document.getElementById('pipeline-name-input').value, '', graphData);
+          await loadPipelineVersions(pipId);
+        }
+
+        const res = await API.runPipeline(pipId, inputSelect.value, selectedVersionId || null);
+        let job = res.job;
+        log(`Job #${job.id}: ${job.status}. Tracking background processing…`);
+        const startedAt = Date.now();
+        while (job.status === 'QUEUED' || job.status === 'PROCESSING') {
+          if (Date.now() - startedAt > 30 * 60 * 1000) {
+            throw new Error(`Job #${job.id} is still processing. Check History for its latest status.`);
+          }
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          job = await API.getJob(job.id);
+          log(`Job #${job.id}: ${job.status}${job.progress ? ` (${job.progress}%)` : ''}.`);
+        }
+        if (job.status === 'FAILED') {
+          throw new Error(job.error_message || `Job #${job.id} failed.`);
+        }
+        if (job.status !== 'COMPLETED' || !job.result) {
+          throw new Error(`Job #${job.id} ended in unexpected state ${job.status}.`);
+        }
+        log(`Job #${job.id} completed in ${job.processing_time}s.`);
+        const outputUrl = job.result.output_url;
+        const imagePreview = document.getElementById('result-img-preview');
+        const videoPreview = document.getElementById('result-video-preview');
+        const isVideo = job.input_file_type === 'VIDEO';
+        imagePreview.style.display = isVideo ? 'none' : outputUrl ? 'block' : 'none';
+        videoPreview.style.display = isVideo && outputUrl ? 'block' : 'none';
+        if (isVideo) videoPreview.src = outputUrl || '';
+        else imagePreview.src = outputUrl || '';
+        document.getElementById('no-result-placeholder').style.display = outputUrl ? 'none' : 'block';
+        const resultLink = document.getElementById('job-result-link');
+        resultLink.href = `/result.html?id=${encodeURIComponent(job.id)}`;
+        resultLink.hidden = false;
+        (job.result.logs || []).forEach(entry => log(entry));
+        const metrics = job.result.metrics || {};
+        document.getElementById('metrics-display').textContent =
+          `Status: ${job.status} · ${metrics.width || 0} × ${metrics.height || 0}` +
+          (metrics.frame_count ? ` · ${metrics.frame_count} frames @ ${metrics.fps} FPS (${metrics.duration}s)` : '') +
+          ` · brightness ${metrics.brightness ?? '—'} · contrast ${metrics.contrast ?? '—'}`;
+      } catch (err) {
+        log(`Execution Error: ${err.message}`);
+        showEditorError(`Execution Error: ${err.message}`);
+      } finally {
+        runButton.disabled = false;
+      }
+    });
+
+    // AI Assistant
+    document.getElementById('ai-gen-btn').addEventListener('click', () => {
+      document.getElementById('ai-modal').classList.add('active');
+    });
+
+    document.getElementById('submit-ai-prompt').addEventListener('click', async () => {
+      const prompt = document.getElementById('ai-prompt').value;
+      if (!prompt) return;
+
+      log(`AI Prompt submitted: "${prompt}"`);
+      try {
+        const res = await API.generateAIPipeline(prompt);
+        builder.loadGraph(res.graph_data);
+        document.getElementById('ai-explanation').textContent = `AI Generated Pipeline Explanation:\n${res.explanation}`;
+        log(`AI successfully generated visual pipeline graph.`);
+      } catch (e) {
+        alert(e.message);
+      }
+    });
+
+    // Export Python Code
+    document.getElementById('export-code-btn').addEventListener('click', async () => {
+      if (!currentPipelineId) {
+        // Generate locally from graph
+        const graphData = builder.getGraphData();
+        const code = generatePythonCode(graphData, document.getElementById('pipeline-name-input').value);
+        document.getElementById('python-code-box').value = code;
+      } else {
+        const res = await API.exportPythonCode(currentPipelineId);
+        document.getElementById('python-code-box').value = res.python_code;
+      }
+      document.getElementById('export-modal').classList.add('active');
+    });
+
+    document.getElementById('copy-code-btn').addEventListener('click', () => {
+      const box = document.getElementById('python-code-box');
+      navigator.clipboard.writeText(box.value).then(() => log('Python code copied to clipboard.')).catch(() => {
+        box.select();
+        document.execCommand('copy');
+        log('Python code copied to clipboard.');
+      });
+    });
+
+    function generatePythonCode(graphData, name) {
+      const byId = new Map(graphData.nodes.map(node => [String(node.id), node]));
+      const incoming = new Map(graphData.nodes.map(node => [String(node.id), 0]));
+      const outgoing = new Map(graphData.nodes.map(node => [String(node.id), []]));
+      (graphData.edges || []).forEach(edge => {
+        if (outgoing.has(String(edge.source)) && incoming.has(String(edge.target))) {
+          outgoing.get(String(edge.source)).push(String(edge.target));
+          incoming.set(String(edge.target), incoming.get(String(edge.target)) + 1);
+        }
+      });
+      const order = new Map(graphData.nodes.map((node, index) => [String(node.id), index]));
+      const ready = [...incoming.entries()].filter(([, count]) => count === 0).map(([id]) => id).sort((a, b) => order.get(a) - order.get(b));
+      const ordered = [];
+      while (ready.length) {
+        const id = ready.shift();
+        ordered.push(byId.get(id));
+        outgoing.get(id).forEach(target => {
+          incoming.set(target, incoming.get(target) - 1);
+          if (incoming.get(target) === 0) {
+            ready.push(target);
+            ready.sort((a, b) => order.get(a) - order.get(b));
+          }
+        });
+      }
+      const operations = (ordered.length === graphData.nodes.length ? ordered : graphData.nodes).filter(node => !['imageSource', 'output'].includes(node.type));
+      const lines = ['import cv2', 'import numpy as np', '', `# ${String(name).replace(/[\r\n]/g, ' ')}`, 'def process_image(path):', '    current = cv2.imread(path)', '    if current is None:', '        raise ValueError(f"Could not read image: {path}")'];
+      operations.forEach(node => {
+        const data = node.data || {};
+        if (node.type === 'grayscale') lines.push('    current = cv2.cvtColor(current, cv2.COLOR_BGR2GRAY) if len(current.shape) == 3 else current');
+        else if (node.type === 'blur' || node.type === 'gaussianBlur' || node.type === 'medianBlur') {
+          const size = Math.max(1, Math.min(63, Number(data.strength || data.kernelSize || 5) | 1));
+          const type = node.type === 'medianBlur' ? 'median' : node.type === 'gaussianBlur' ? 'gaussian' : ['gaussian', 'median', 'box'].includes(data.blurType) ? data.blurType : 'gaussian';
+          if (type === 'median') lines.push(`    current = cv2.medianBlur(current, ${Math.max(3, size)})`);
+          else if (type === 'box') lines.push(`    current = cv2.blur(current, (${size}, ${size}))`);
+          else lines.push(`    current = cv2.GaussianBlur(current, (${size}, ${size}), 0)`);
+        } else if (node.type === 'canny') lines.push(`    current = cv2.Canny(cv2.cvtColor(current, cv2.COLOR_BGR2GRAY) if len(current.shape) == 3 else current, ${Number(data.threshold1 ?? 75)}, ${Number(data.threshold2 ?? 200)})`);
+        else if (node.type === 'threshold' || node.type === 'adaptiveThreshold') {
+          const gray = 'cv2.cvtColor(current, cv2.COLOR_BGR2GRAY) if len(current.shape) == 3 else current';
+          if (node.type === 'adaptiveThreshold' || data.mode === 'adaptive') lines.push(`    current = cv2.adaptiveThreshold(${gray}, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, ${Number(data.blockSize || 11) | 1}, ${Number(data.constant ?? 2)})`);
+          else if (data.mode === 'otsu') lines.push(`    _, current = cv2.threshold(${gray}, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)`);
+          else lines.push(`    _, current = cv2.threshold(${gray}, ${Number(data.threshold ?? 127)}, 255, cv2.THRESH_BINARY)`);
+        } else if (node.type === 'resize') lines.push(`    current = cv2.resize(current, (${Math.max(1, Number(data.width || 640))}, ${Math.max(1, Number(data.height || 480))}), interpolation=cv2.INTER_AREA)`);
+        else if (node.type === 'crop') {
+          const x = Math.max(0, Number(data.x || 0)), y = Math.max(0, Number(data.y || 0));
+          lines.push(`    current = current[${y}:${y + Math.max(1, Number(data.height || 240))}, ${x}:${x + Math.max(1, Number(data.width || 320))}].copy()`);
+        } else if (node.type === 'rotate') {
+          const angle = ((Number(data.angle || 90) % 360) + 360) % 360;
+          if (angle === 90) lines.push('    current = cv2.rotate(current, cv2.ROTATE_90_CLOCKWISE)');
+          else if (angle === 180) lines.push('    current = cv2.rotate(current, cv2.ROTATE_180)');
+          else if (angle === 270) lines.push('    current = cv2.rotate(current, cv2.ROTATE_90_COUNTERCLOCKWISE)');
+          else if (angle) lines.push(`    _h, _w = current.shape[:2]`, `    _matrix = cv2.getRotationMatrix2D((_w / 2, _h / 2), ${angle}, 1.0)`, '    current = cv2.warpAffine(current, _matrix, (_w, _h))');
+        } else if (node.type === 'brightness') lines.push(`    current = cv2.convertScaleAbs(current, alpha=${Number(data.contrast ?? 1.2)}, beta=${Number(data.brightness ?? 20)})`);
+        else if (node.type === 'sharpen') lines.push('    _blurred = cv2.GaussianBlur(current, (0, 0), 3)', `    current = cv2.addWeighted(current, ${1 + Number(data.amount ?? 1)}, _blurred, ${-Number(data.amount ?? 1)}, 0)`);
+        else if (node.type === 'morphological') {
+          const operation = {erode:'MORPH_ERODE',dilate:'MORPH_DILATE',open:'MORPH_OPEN',close:'MORPH_CLOSE'}[data.operation] || 'MORPH_ERODE';
+          lines.push(`    _kernel = np.ones((3, 3), np.uint8)`, `    current = cv2.morphologyEx(current, cv2.${operation}, _kernel, iterations=${Math.max(1, Number(data.iterations || 1))})`);
+        } else if (node.type === 'findContours') lines.push('    _gray = cv2.cvtColor(current, cv2.COLOR_BGR2GRAY) if len(current.shape) == 3 else current', '    _contours, _ = cv2.findContours(_gray, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)', '    current = cv2.cvtColor(_gray, cv2.COLOR_GRAY2BGR)', '    cv2.drawContours(current, _contours, -1, (0, 255, 0), 2)');
+        else if (node.type === 'histogram') lines.push('    _gray = cv2.cvtColor(current, cv2.COLOR_BGR2GRAY) if len(current.shape) == 3 else current', '    histogram = cv2.calcHist([_gray], [0], None, [256], [0, 256]).flatten()');
+        else if (node.type === 'imageStatistics') lines.push('    _gray = cv2.cvtColor(current, cv2.COLOR_BGR2GRAY) if len(current.shape) == 3 else current', "    image_statistics = {'mean': float(np.mean(_gray)), 'stddev': float(np.std(_gray)), 'min': int(np.min(_gray)), 'max': int(np.max(_gray))}");
+      });
+      lines.push('    return current', '', "if __name__ == '__main__':", "    result = process_image('input.jpg')", "    cv2.imwrite('output.png', result)");
+      return lines.join('\n');
+    }
+
+    document.getElementById('download-code-btn').addEventListener('click', () => {
+      const blob = new Blob([document.getElementById('python-code-box').value], { type: 'text/x-python' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${document.getElementById('pipeline-name-input').value.trim().replace(/[^a-z0-9_-]+/gi, '_') || 'visioflow_pipeline'}.py`;
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VisioFlow | Projects</title>
+  <link rel="stylesheet" href="/css/style.css?v=20261011-orange-2">
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header"><a class="sidebar-brand" href="/dashboard.html"><img class="sidebar-logo" src="/static/assets/images/visioflow-logo.png?v=2" alt="VisioFlow logo"><span class="sidebar-brand-name">VisioFlow</span></a></div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html" class="nav-item">◈ Dashboard</a>
+        <a href="/projects.html" class="nav-item active">▦ Projects</a>
+        <a href="/pipeline-editor.html" class="nav-item">⌘ Visual Editor</a>
+        <a href="/analytics.html" class="nav-item">↗ Analytics</a>
+        <a href="/history.html" class="nav-item">◷ History</a>
+        <a href="/reports.html" class="nav-item">▤ Reports</a>
+        <a href="/api-playground.html" class="nav-item">⌘ API Playground</a>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <header class="top-header"><div class="header-title">Projects</div><div class="user-badge"><a href="/dashboard.html">Workspace</a></div></header>
+      <div class="content-body">
+        <section class="page-intro">
+          <div><p class="eyebrow">WORKSPACE / PROJECTS</p><h1>Project library</h1><p class="text-muted">Keep input media, pipelines, and processing runs together.</p></div>
+          <button id="new-project-btn" class="btn btn-primary">＋ New project</button>
+        </section>
+        <div class="project-toolbar"><label class="search-field"><span>⌕</span><input id="project-search" class="form-control" type="search" placeholder="Search projects by name or description"></label><span id="project-count" class="text-muted"></span></div>
+        <div id="project-error" class="notice notice-error" role="alert" hidden></div>
+        <section id="projects-grid" class="projects-grid" aria-live="polite"><div class="loading-state">Loading your projects…</div></section>
+      </div>
+    </main>
+  </div>
+  <div id="project-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="project-modal-title">
+    <div class="modal">
+      <div class="modal-header"><span id="project-modal-title">Create project</span><button type="button" class="icon-button" data-close-modal aria-label="Close">×</button></div>
+      <form id="project-form">
+        <div class="form-group"><label for="project-name">Project name</label><input id="project-name" name="name" class="form-control" maxlength="200" required></div>
+        <div class="form-group"><label for="project-description">Description</label><textarea id="project-description" name="description" class="form-control" rows="4" placeholder="What are you exploring?"></textarea></div>
+        <div class="modal-actions"><button type="button" class="btn btn-secondary" data-close-modal>Cancel</button><button id="project-submit" type="submit" class="btn btn-primary">Create project</button></div>
+      </form>
+    </div>
+  </div>
+  <div id="toast-region" class="toast-region" aria-live="polite"></div>
+  <script src="/js/api.js"></script>
+  <script src="/js/projects.js"></script>
+</body>
+</html>

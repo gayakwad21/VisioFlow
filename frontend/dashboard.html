@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VisioFlow | Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css?v=20261011-orange-2">
+</head>
+<body class="dashboard-page">
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header"><a class="sidebar-brand" href="/dashboard.html"><img class="sidebar-logo" src="/static/assets/images/visioflow-logo.png?v=2" alt="VisioFlow logo"><span class="sidebar-brand-name">VisioFlow</span></a></div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html" class="nav-item active">◈ Dashboard</a>
+        <a href="/projects.html" class="nav-item">▦ Projects</a>
+        <a href="/pipeline-editor.html" class="nav-item">⌘ Visual Editor</a>
+        <a href="/analytics.html" class="nav-item">↗ Analytics</a>
+        <a href="/history.html" class="nav-item">◷ History</a>
+        <a href="/reports.html" class="nav-item">▤ Reports</a>
+        <a href="/api-playground.html" class="nav-item">⌘ API Playground</a>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <header class="top-header">
+        <div class="header-title">Workspace overview</div>
+        <div class="user-badge"><span id="user-display">Loading account…</span><button id="logout-btn" class="btn btn-secondary">Log out</button></div>
+      </header>
+      <div class="content-body">
+        <section class="page-intro">
+          <div><p class="eyebrow">VISIOFLOW / WORKSPACE</p><h1>Your computer vision workspace</h1><p class="text-muted">A live overview of projects, pipelines, and processing activity.</p></div>
+          <a class="btn btn-primary" href="/projects.html?create=1">＋ New project</a>
+        </section>
+        <div id="dashboard-error" class="notice notice-error" role="alert" hidden></div>
+        <section id="dashboard-stats" class="stats-grid" aria-label="Workspace statistics">
+          <article class="stat-card"><span class="stat-label">Projects</span><strong class="stat-value" id="stat-projects">—</strong><span class="text-muted">Owned projects</span></article>
+          <article class="stat-card"><span class="stat-label">Pipelines</span><strong class="stat-value" id="stat-pipelines">—</strong><span class="text-muted">Saved workflows</span></article>
+          <article class="stat-card"><span class="stat-label">Processing jobs</span><strong class="stat-value" id="stat-jobs">—</strong><span class="text-muted">All statuses</span></article>
+          <article class="stat-card"><span class="stat-label">Completed</span><strong class="stat-value" id="stat-completed">—</strong><span class="text-muted">Successful runs</span></article>
+          <article class="stat-card"><span class="stat-label">Failed</span><strong class="stat-value" id="stat-failed">—</strong><span class="text-muted">Runs needing attention</span></article>
+        </section>
+        <section class="quick-actions" aria-label="Quick actions">
+          <a href="/projects.html?create=1"><span class="action-icon">＋</span><span><strong>New project</strong><small>Organize an experiment</small></span></a>
+          <a href="/projects.html"><span class="action-icon">⇧</span><span><strong>Upload media</strong><small>Add an image or video</small></span></a>
+          <a href="/pipeline-editor.html"><span class="action-icon">⌘</span><span><strong>Create pipeline</strong><small>Build a visual workflow</small></span></a>
+          <a href="/history.html"><span class="action-icon">◷</span><span><strong>View history</strong><small>Review recent executions</small></span></a>
+          <a href="/analytics.html"><span class="action-icon">↗</span><span><strong>Analytics</strong><small>Explore your usage</small></span></a>
+        </section>
+        <div class="dashboard-columns">
+          <section class="panel">
+            <div class="section-heading"><div><p class="eyebrow">YOUR WORK</p><h2>Recent projects</h2></div><a href="/projects.html">All projects →</a></div>
+            <div id="recent-projects" class="project-list"><div class="loading-state">Loading projects…</div></div>
+          </section>
+          <section class="panel">
+            <div class="section-heading"><div><p class="eyebrow">EXECUTIONS</p><h2>Recent jobs</h2></div><a href="/history.html">View history →</a></div>
+            <div id="recent-jobs" class="table-scroll"><div class="loading-state">Loading jobs…</div></div>
+          </section>
+        </div>
+        <section class="panel activity-panel">
+          <div class="section-heading"><div><p class="eyebrow">AUDIT TRAIL</p><h2>Recent activity</h2></div></div>
+          <div id="recent-activity" class="activity-list"><div class="loading-state">Loading activity…</div></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <div id="toast-region" class="toast-region" aria-live="polite"></div>
+  <script src="/js/api.js"></script>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

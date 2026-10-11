@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VisioFlow | Analytics</title>
+  <link rel="stylesheet" href="/css/style.css?v=20261011-orange-2">
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header"><a class="sidebar-brand" href="/dashboard.html"><img class="sidebar-logo" src="/static/assets/images/visioflow-logo.png?v=2" alt="VisioFlow logo"><span class="sidebar-brand-name">VisioFlow</span></a></div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html" class="nav-item">📊 Dashboard</a>
+        <a href="/projects.html" class="nav-item">📁 Projects</a>
+        <a href="/pipeline-editor.html" class="nav-item">🛠️ Visual Editor</a>
+        <a href="/analytics.html" class="nav-item active">📈 Analytics</a>
+        <a href="/history.html" class="nav-item">🕒 History</a>
+        <a href="/reports.html" class="nav-item">📄 Reports</a>
+        <a href="/api-playground.html" class="nav-item">🧪 API Playground</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="top-header">
+        <div class="header-title">Platform & Job Analytics</div>
+      </header>
+
+      <div class="content-body">
+        <div class="stats-grid">
+          <div class="stat-card"><span class="stat-label">Projects</span><span class="stat-value" id="projects-count">—</span></div>
+          <div class="stat-card"><span class="stat-label">Pipelines</span><span class="stat-value" id="pipelines-count">—</span></div>
+          <div class="stat-card"><span class="stat-label">Processing Jobs</span><span class="stat-value" id="jobs-count">—</span></div>
+          <div class="stat-card">
+            <span class="stat-label">Total Processing Time</span>
+            <span class="stat-value" id="total-time">—</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Success Rate</span>
+            <span class="stat-value" id="success-rate">—</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Failed Jobs</span>
+            <span class="stat-value" id="failed-count">—</span>
+          </div>
+        </div>
+
+        <div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 0.5rem; padding: 1.5rem; margin-top: 1.5rem;">
+          <h3 style="margin-bottom: 1rem;">Computer Vision Operation Distribution</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">
+            Frequency of OpenCV nodes executed across saved pipelines:
+          </p>
+          <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;" id="ops-breakdown"><span class="text-muted">Loading operation usage…</span></div>
+        </div>
+        <div class="panel" style="margin-top:1rem;"><h3>Most-used pipelines</h3><div id="most-used-pipelines" class="simple-list"><div class="loading-state">Loading pipeline usage…</div></div></div>
+        <div id="analytics-error" class="notice notice-error" role="alert" hidden></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const stats = await API.getDashboardStats();
+        document.getElementById('projects-count').textContent = stats.projects_count ?? 0;
+        document.getElementById('pipelines-count').textContent = stats.pipelines_count ?? 0;
+        document.getElementById('jobs-count').textContent = stats.jobs_count ?? 0;
+        document.getElementById('total-time').textContent = `${stats.total_processing_time || 0} s`;
+        document.getElementById('failed-count').textContent = stats.failed_jobs || 0;
+        
+        const total = stats.jobs_count || 0;
+        const rate = total > 0 ? Math.round((stats.completed_jobs / total) * 100) : 0;
+        document.getElementById('success-rate').textContent = `${rate} %`;
+        const operations = Object.entries(stats.operation_counts || {}).sort((a, b) => b[1] - a[1]);
+        document.getElementById('ops-breakdown').innerHTML = operations.length
+          ? operations.map(([name, count]) => `<div class="operation-chip"><strong>${name.replace(/[&<>"']/g, '')}</strong>: ${count}</div>`).join('')
+          : '<span class="text-muted">No pipeline operations saved yet.</span>';
+        const pipelines = stats.most_used_pipelines || [];
+        document.getElementById('most-used-pipelines').innerHTML = pipelines.length
+          ? pipelines.map(item => `<div class="simple-list-row"><strong>${String(item.name).replace(/[&<>"']/g, '')}</strong><span class="text-muted">${item.job_count} jobs</span></div>`).join('')
+          : '<div class="empty-state compact"><strong>No saved pipelines</strong><span>Create and run a pipeline to see usage here.</span></div>';
+      } catch (e) {
+        const error = document.getElementById('analytics-error');
+        error.hidden = false;
+        error.textContent = `Analytics could not be loaded: ${e.message}`;
+      }
+    });
+  </script>
+</body>
+</html>

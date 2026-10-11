@@ -1,0 +1,204 @@
+.editor-container {
+  display: flex;
+  height: calc(100vh - 60px);
+  overflow: hidden;
+  background-color: transparent;
+  position: relative;
+}
+
+.editor-left-sidebar {
+  width: 250px;
+  background-color: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.sidebar-section-title {
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.node-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.node-item {
+  padding: 0.6rem 0.8rem;
+  background-color: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.node-item:hover {
+  background-color: var(--surface-hover);
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.editor-canvas-wrapper {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background-color: #fffdfb;
+  background-image: radial-gradient(color-mix(in srgb, var(--text-muted) 20%, transparent) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+#svg-connections {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.editor-node {
+  position: absolute;
+  width: 180px;
+  background-color: var(--surface);
+  border: 2px solid var(--border-color);
+  border-radius: 0.5rem;
+  box-shadow: 0 5px 14px rgba(75, 45, 23, 0.12);
+  z-index: 2;
+  cursor: move;
+  user-select: none;
+  transition: border-color 0.15s ease;
+}
+
+.editor-node.selected {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 24%, transparent), 0 7px 18px rgba(75, 45, 23, 0.14);
+}
+
+.node-header {
+  padding: 0.5rem 0.75rem;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  border-top-left-radius: 0.4rem;
+  border-top-right-radius: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.node-body {
+  padding: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.node-delete { color: var(--danger); cursor: pointer; }
+.node-id { color: var(--text-muted); font-size: 0.75rem; }
+
+.port {
+  width: 12px;
+  height: 12px;
+  background-color: var(--primary);
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  position: absolute;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.port-input {
+  left: -7px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.port-output {
+  right: -7px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.editor-right-sidebar {
+  width: 320px;
+  background-color: var(--bg-secondary);
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.panel-header {
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
+}
+
+.panel-content {
+  padding: 1rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.editor-bottom-logs {
+  position: absolute;
+  bottom: 0; left: 250px; right: 320px;
+  height: 160px;
+  background-color: var(--bg-primary);
+  border-top: 1px solid var(--border-color);
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+}
+
+.logs-header {
+  padding: 0.4rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background-color: var(--bg-secondary);
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logs-content {
+  padding: 0.5rem 1rem;
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: var(--success);
+  overflow-y: auto;
+  flex: 1;
+}
+
+@media (max-width: 900px) {
+  .editor-left-sidebar { width: 190px; }
+  .editor-right-sidebar { width: 270px; }
+  .editor-bottom-logs { left: 190px; right: 270px; }
+}
+
+@media (max-width: 640px) {
+  .editor-left-sidebar { width: 150px; }
+  .editor-right-sidebar { width: 220px; }
+  .editor-bottom-logs { left: 150px; right: 220px; }
+  .editor-page .top-header > div:first-child { gap: 0.5rem !important; }
+}

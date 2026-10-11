@@ -1,0 +1,8 @@
+.venv/
+.venv-py314-backup/
+.env
+__pycache__/
+*.py[cod]
+*.log
+db.sqlite3
+media/

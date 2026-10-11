@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VisioFlow | Processing History</title>
+  <link rel="stylesheet" href="/css/style.css?v=20261011-orange-2">
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header"><a class="sidebar-brand" href="/dashboard.html"><img class="sidebar-logo" src="/static/assets/images/visioflow-logo.png?v=2" alt="VisioFlow logo"><span class="sidebar-brand-name">VisioFlow</span></a></div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html" class="nav-item">📊 Dashboard</a>
+        <a href="/projects.html" class="nav-item">📁 Projects</a>
+        <a href="/pipeline-editor.html" class="nav-item">🛠️ Visual Editor</a>
+        <a href="/analytics.html" class="nav-item">📈 Analytics</a>
+        <a href="/history.html" class="nav-item active">🕒 History</a>
+        <a href="/reports.html" class="nav-item">📄 Reports</a>
+        <a href="/api-playground.html" class="nav-item">🧪 API Playground</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="top-header">
+        <div class="header-title">Processing Job History</div>
+      </header>
+
+      <div class="content-body">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Job ID</th>
+                <th>Project</th>
+                <th>Pipeline</th>
+                <th>Input</th>
+                <th>Status</th>
+                <th>Processing Time</th>
+                <th>Created Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="jobs-table">
+              <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Loading job history...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    async function loadJobs() {
+      const tbody = document.getElementById('jobs-table');
+      try {
+        const jobs = await API.getJobs();
+        if (jobs.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No processing jobs executed yet.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = jobs.map(j => {
+          let badgeClass = 'badge-processing';
+          if (j.status === 'COMPLETED') badgeClass = 'badge-completed';
+          if (j.status === 'FAILED') badgeClass = 'badge-failed';
+          if (j.status === 'QUEUED') badgeClass = 'badge-queued';
+
+          return `
+            <tr>
+              <td><strong>#${j.id}</strong></td>
+              <td>${escapeHtml(j.project_name || '-')}</td>
+              <td><span class="text-link-accent">${escapeHtml(j.pipeline_name || '-')}</span></td>
+              <td>${escapeHtml(j.input_file_name || '—')}</td>
+              <td><span class="badge ${badgeClass}">${j.status}</span></td>
+              <td>${Number(j.processing_time || 0).toFixed(3)} s</td>
+              <td>${new Date(j.created_at).toLocaleString()}</td>
+              <td>
+                <a href="/result.html?id=${encodeURIComponent(j.id)}" class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem;">View</a>
+                ${j.status === 'FAILED' ? `<button onclick="retryJob(${j.id})" class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem;">Retry Job</button>` : ''}
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" class="error-text" style="text-align: center;">Error loading history: ${escapeHtml(err.message)}</td></tr>`;
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    }
+
+    async function retryJob(id) {
+      try {
+        const job = await API.retryJob(id);
+        alert(`Retry queued as job #${job.id}. Track its status in History.`);
+        loadJobs();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    loadJobs();
+    window.setInterval(() => {
+      if (!document.hidden) loadJobs();
+    }, 5000);
+  </script>
+</body>
+</html>

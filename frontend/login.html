@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VisioFlow | Login</title>
+  <link rel="stylesheet" href="/css/style.css?v=20261011-orange-2">
+</head>
+<body class="auth-page">
+  <main class="auth-shell">
+    <a class="auth-brand" href="/" aria-label="VisioFlow home">
+      <img src="/static/assets/images/visioflow-logo.png?v=2" alt="VisioFlow logo">
+      <span>VisioFlow</span>
+    </a>
+    <section class="auth-card">
+      <p class="eyebrow">VISUAL COMPUTER VISION WORKSPACE</p>
+      <h1>Welcome back</h1>
+      <p class="auth-description">Sign in to continue building and running your workflows.</p>
+    
+    <div id="error-msg" role="alert"></div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" class="form-control" required placeholder="Enter username">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" class="form-control" required placeholder="Enter password">
+      </div>
+      <button type="submit" class="btn btn-primary">Log In</button>
+    </form>
+
+    <div class="auth-footer">
+      Don't have an account? <a href="/register.html">Register here</a>
+    </div>
+    </section>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errDiv = document.getElementById('error-msg');
+      errDiv.style.display = 'none';
+
+      const u = document.getElementById('username').value;
+      const p = document.getElementById('password').value;
+
+      try {
+        await API.login(u, p);
+        window.location.href = '/dashboard.html';
+      } catch (err) {
+        errDiv.textContent = err.message || 'Login failed';
+        errDiv.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

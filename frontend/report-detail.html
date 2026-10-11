@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VisioFlow | Processing report</title>
+  <link rel="stylesheet" href="/css/style.css?v=20261011-orange-2">
+</head>
+<body class="reports-page report-detail-page">
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header"><a class="sidebar-brand" href="/dashboard.html"><img class="sidebar-logo" src="/static/assets/images/visioflow-logo.png?v=2" alt="VisioFlow logo"><span class="sidebar-brand-name">VisioFlow</span></a></div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html" class="nav-item">📊 Dashboard</a>
+        <a href="/projects.html" class="nav-item">📁 Projects</a>
+        <a href="/pipeline-editor.html" class="nav-item">🛠️ Visual Editor</a>
+        <a href="/analytics.html" class="nav-item">📈 Analytics</a>
+        <a href="/history.html" class="nav-item">🕒 History</a>
+        <a href="/reports.html" class="nav-item active">📄 Reports</a>
+        <a href="/api-playground.html" class="nav-item">🧪 API Playground</a>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <header class="top-header"><div class="header-title">Processing report</div><a class="report-back-link" href="/reports.html">← Reports</a></header>
+      <div class="content-body report-content">
+        <div id="report-detail-error" class="notice notice-error" role="alert" hidden></div>
+        <div id="report-detail-loading" class="loading-state">Loading report details…</div>
+        <article id="report-print-area" class="report-document" hidden>
+          <section class="report-hero">
+            <div>
+              <p class="eyebrow">COMPUTER VISION ANALYSIS</p>
+              <h1 id="detail-title"></h1>
+              <p id="detail-summary" class="report-lead"></p>
+              <div class="report-hero-meta"><span id="detail-job-id"></span><span id="detail-created"></span><span id="detail-author"></span></div>
+            </div>
+            <span id="detail-status" class="report-status"></span>
+          </section>
+
+          <div class="report-actions" aria-label="Report actions">
+            <a href="/reports.html" class="btn btn-secondary">← Back to reports</a>
+            <a id="download-output" class="btn btn-primary" href="#" hidden>Download output</a>
+            <button id="export-json" class="btn btn-secondary" type="button">Export JSON</button>
+            <button id="export-html" class="btn btn-secondary" type="button">Export HTML</button>
+            <button id="print-report" class="btn btn-secondary" type="button">Print report</button>
+          </div>
+
+          <section class="panel report-panel">
+            <div class="section-heading"><div><p class="eyebrow">REPORT OVERVIEW</p><h2>Run details</h2></div></div>
+            <dl id="overview-grid" class="report-overview-grid"></dl>
+          </section>
+
+          <section class="panel report-panel">
+            <div class="section-heading"><div><p class="eyebrow">INPUT VS OUTPUT</p><h2>Media comparison</h2></div><span id="comparison-kind" class="text-muted"></span></div>
+            <div class="report-media-grid">
+              <section class="report-media-card">
+                <div class="report-media-heading"><div><p class="eyebrow">ORIGINAL</p><h3 id="input-name">Input file</h3></div><span class="media-badge">Input</span></div>
+                <div id="input-preview" class="report-media-preview"><span class="text-muted">Input preview is not available.</span></div>
+                <dl id="input-metadata" class="report-file-metadata"></dl>
+              </section>
+              <section class="report-media-card">
+                <div class="report-media-heading"><div><p class="eyebrow">PROCESSED</p><h3 id="output-name">Output file</h3></div><span class="media-badge output-badge">Output</span></div>
+                <div id="output-preview" class="report-media-preview"><span class="text-muted">No processed output is available.</span></div>
+                <dl id="output-metadata" class="report-file-metadata"></dl>
+              </section>
+            </div>
+          </section>
+
+          <section class="panel report-panel">
+            <div class="section-heading"><div><p class="eyebrow">KEY DIFFERENCES</p><h2>What changed</h2></div></div>
+            <div id="difference-summary" class="difference-grid"></div>
+            <h3 class="report-subheading">Operations applied</h3>
+            <div id="operation-summary" class="operation-summary"></div>
+            <h3 class="report-subheading">Recorded metrics</h3>
+            <div id="recorded-metrics" class="report-metrics-grid"></div>
+            <p class="report-honesty-note">Metrics are shown only when recorded by this job. Descriptions explain operation behavior; they are not additional measured results.</p>
+          </section>
+
+          <section class="panel report-panel">
+            <div class="section-heading"><div><p class="eyebrow">PIPELINE EXECUTION</p><h2>Executed sequence</h2></div><span id="execution-time" class="text-muted"></span></div>
+            <div id="pipeline-steps" class="report-steps"></div>
+            <div id="execution-messages" class="report-execution-messages" hidden></div>
+            <details class="report-logs"><summary>Execution log</summary><pre id="execution-log" class="report-json"></pre></details>
+          </section>
+
+          <section class="panel report-panel report-conclusion">
+            <div class="section-heading"><div><p class="eyebrow">CONCLUSION</p><h2>Run summary</h2></div></div>
+            <p id="detail-conclusion"></p>
+          </section>
+        </article>
+      </div>
+    </main>
+  </div>
+  <div id="toast-region" class="toast-region" aria-live="polite"></div>
+  <script src="/js/api.js"></script>
+  <script src="/js/report-detail.js"></script>
+</body>
+</html>

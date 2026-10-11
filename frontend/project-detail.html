@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VisioFlow | Project Workspace</title>
+  <link rel="stylesheet" href="/css/style.css?v=20261011-orange-2">
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header"><a class="sidebar-brand" href="/dashboard.html"><img class="sidebar-logo" src="/static/assets/images/visioflow-logo.png?v=2" alt="VisioFlow logo"><span class="sidebar-brand-name">VisioFlow</span></a></div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html" class="nav-item">◈ Dashboard</a>
+        <a href="/projects.html" class="nav-item active">▦ Projects</a>
+        <a href="/pipeline-editor.html" class="nav-item">⌘ Visual Editor</a>
+        <a href="/analytics.html" class="nav-item">↗ Analytics</a>
+        <a href="/history.html" class="nav-item">◷ History</a>
+        <a href="/reports.html" class="nav-item">▤ Reports</a>
+        <a href="/api-playground.html" class="nav-item">⌘ API Playground</a>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <header class="top-header"><div class="header-title"><a href="/projects.html">Projects</a> / <span id="project-breadcrumb">Loading…</span></div><a href="/dashboard.html">Workspace</a></header>
+      <div class="content-body">
+        <div id="workspace-error" class="notice notice-error" role="alert" hidden></div>
+        <section class="project-workspace-hero">
+          <div><p class="eyebrow">PROJECT WORKSPACE</p><h1 id="workspace-title">Loading project…</h1><p id="workspace-description" class="text-muted"></p><p id="workspace-dates" class="workspace-dates"></p></div>
+          <div class="workspace-actions"><button id="rename-project-btn" class="btn btn-secondary">Project settings</button><a id="new-pipeline-link" class="btn btn-primary" href="#">＋ New pipeline</a></div>
+        </section>
+        <section class="stats-grid workspace-stats">
+          <article class="stat-card"><span class="stat-label">Files</span><strong id="workspace-files-count" class="stat-value">—</strong></article>
+          <article class="stat-card"><span class="stat-label">Pipelines</span><strong id="workspace-pipelines-count" class="stat-value">—</strong></article>
+          <article class="stat-card"><span class="stat-label">Processing jobs</span><strong id="workspace-jobs-count" class="stat-value">—</strong></article>
+          <article class="stat-card"><span class="stat-label">Completed</span><strong id="workspace-completed-count" class="stat-value">—</strong></article>
+        </section>
+        <section class="panel">
+          <div class="section-heading"><div><p class="eyebrow">PROJECT INPUTS</p><h2>Files & media</h2><p class="text-muted">Supported: JPG, PNG, BMP, WEBP, MP4, AVI, MOV, MKV, WEBM · 100 MB max</p></div>
+            <label class="btn btn-primary upload-cta">⇧ Upload media<input id="media-upload" type="file" accept=".jpg,.jpeg,.png,.bmp,.webp,.mp4,.avi,.mov,.mkv,.webm"></label></div>
+          <div id="upload-status" class="upload-status" role="status"></div>
+          <div id="workspace-files" class="media-grid"><div class="loading-state">Loading files…</div></div>
+        </section>
+        <div class="dashboard-columns workspace-columns">
+          <section class="panel"><div class="section-heading"><div><p class="eyebrow">REUSABLE WORKFLOWS</p><h2>Pipelines</h2></div><a id="pipelines-editor-link" href="#">Open editor →</a></div><div id="workspace-pipelines" class="simple-list"><div class="loading-state">Loading pipelines…</div></div></section>
+          <section class="panel"><div class="section-heading"><div><p class="eyebrow">LATEST EXECUTIONS</p><h2>Processing history</h2></div><a href="/history.html">Full history →</a></div><div id="workspace-jobs" class="simple-list"><div class="loading-state">Loading processing history…</div></div></section>
+        </div>
+      </div>
+    </main>
+  </div>
+  <div id="project-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="project-modal-title">
+    <div class="modal"><div class="modal-header"><span id="project-modal-title">Project settings</span><button type="button" class="icon-button" data-close-modal aria-label="Close">×</button></div>
+      <form id="project-form"><div class="form-group"><label for="project-name">Project name</label><input id="project-name" class="form-control" maxlength="200" required></div>
+      <div class="form-group"><label for="project-description">Description</label><textarea id="project-description" class="form-control" rows="3"></textarea></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" data-close-modal>Cancel</button><button id="save-project-btn" type="submit" class="btn btn-primary">Save changes</button></div></form>
+    </div>
+  </div>
+  <div id="toast-region" class="toast-region" aria-live="polite"></div>
+  <script src="/js/api.js"></script>
+  <script src="/js/project-detail.js"></script>
+</body>
+</html>
